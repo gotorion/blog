@@ -14,14 +14,17 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
   description="记录软件构建、公开学习与独立项目的思考和实践。"
 >
   <section class="hero">
-    <p class="eyebrow">记录与思考</p>
-    <h1>认真构建。<br />分享所学。</h1>
-    <p>
+    <div class="hero-eyebrow">
+      <span>Gotorion Journal</span>
+      <span>中文 · 个人札记</span>
+    </div>
+    <h1>破山中贼易，<br />破心中贼难。</h1>
+    <p class="hero-tagline">
       一个关于软件、有趣实验，以及那些让项目值得被留下来的细节的个人博客。
     </p>
   </section>
 
-  <section aria-labelledby="latest-posts">
+  <section class="post-index" aria-labelledby="latest-posts">
     <div class="section-heading">
       <h2 id="latest-posts">最新文章</h2>
       <span>共 {posts.length} 篇</span>
@@ -32,8 +35,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
         <ul class="post-list">
           {latestPosts.map((post) => (
             <li>
-              <article>
-                <p class="post-meta">
+              <article class="post-row">
+                <div class="post-row-meta">
                   <time datetime={post.data.pubDate.toISOString()}>
                     {post.data.pubDate.toLocaleDateString("zh-CN", {
                       year: "numeric",
@@ -42,17 +45,28 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
                       timeZone: "UTC",
                     })}
                   </time>
-                </p>
-                <h3>
-                  <a href={`${base}/blog/${post.id}/`}>{post.data.title}</a>
-                </h3>
-                <p>{post.data.description}</p>
+                </div>
+                <div class="post-row-content">
+                  <h3>
+                    <a href={`${base}/blog/${post.id}/`}>{post.data.title}</a>
+                  </h3>
+                  <p>{post.data.description}</p>
+                  {
+                    post.data.tags.length > 0 && (
+                      <ul class="post-tags" aria-label="文章标签">
+                        {post.data.tags.map((tag) => <li>{tag}</li>)}
+                      </ul>
+                    )
+                  }
+                </div>
               </article>
             </li>
           ))}
         </ul>
       ) : (
-        <p class="empty-state">还没有文章。请在 <code>src/content/blog/</code> 中添加。</p>
+        <p class="empty-state">
+          还没有文章。请在 <code>src/content/blog/</code> 中添加。
+        </p>
       )
     }
   </section>

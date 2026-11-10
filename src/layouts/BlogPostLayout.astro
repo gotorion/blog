@@ -6,35 +6,63 @@ interface Props {
   description: string;
   pubDate: Date;
   updatedDate?: Date;
+  tags?: string[];
 }
 
-const { title, description, pubDate, updatedDate } = Astro.props;
-const published = pubDate.toLocaleDateString("zh-CN", {
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-  timeZone: "UTC",
-});
-const updated = updatedDate?.toLocaleDateString("zh-CN", {
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-  timeZone: "UTC",
-});
+const {
+  title,
+  description,
+  pubDate,
+  updatedDate,
+  tags = [],
+} = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+const formatDate = (date: Date) =>
+  date
+    .toLocaleDateString("zh-CN", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      timeZone: "UTC",
+    })
+    .replace(/(\d)(年|月|日)/g, "$1 $2");
+
+const published = formatDate(pubDate);
+const updated = updatedDate ? formatDate(updatedDate) : undefined;
 ---
 
 <BaseLayout title={title} description={description}>
   <article class="post">
     <header class="post-header">
+      <div class="post-kicker">
+        <span>文章</span>
+        <time datetime={pubDate.toISOString()}>{published}</time>
+      </div>
       <h1>{title}</h1>
       <p class="post-description">{description}</p>
-      <p class="post-meta">
-        <time datetime={pubDate.toISOString()}>{published}</time>
-        {updated && <span> · 更新于 {updated}</span>}
-      </p>
+      {
+        updated && (
+          <p class="post-updated">
+            更新于 <time datetime={updatedDate?.toISOString()}>{updated}</time>
+          </p>
+        )
+      }
     </header>
+
     <div class="prose">
       <slot />
     </div>
+
+    <footer class="post-footer">
+      <a class="back-link" href={`${base}/`}>← 返回全部文章</a>
+      {
+        tags.length > 0 && (
+          <ul class="post-tags" aria-label="文章标签">
+            {tags.map((tag) => <li>{tag}</li>)}
+          </ul>
+        )
+      }
+    </footer>
   </article>
 </BaseLayout>

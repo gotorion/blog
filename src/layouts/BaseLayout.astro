@@ -19,6 +19,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#f5f4ed" />
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
     <link
@@ -31,21 +32,30 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
   <body>
     <header class="site-header">
       <div class="container header-inner">
-        <a class="site-title" href={`${base}/`}>Gotorion Blog</a>
-        <nav aria-label="主导航">
+        <a class="site-title" href={`${base}/`}>
+          Gotorion <span>Blog</span>
+        </a>
+        <nav class="site-nav" aria-label="主导航">
           <a href={`${base}/`}>文章</a>
           <a href={`${base}/about/`}>关于</a>
         </nav>
       </div>
     </header>
 
-    <main class="container">
+    <main class="container site-main">
       <slot />
     </main>
 
     <footer class="site-footer">
-      <div class="container">
-        <p>© {new Date().getFullYear()} Gotorion · 保留所有权利</p>
+      <div class="container footer-inner">
+        <div class="footer-mark">
+          <p class="footer-title">Gotorion Blog</p>
+          <p class="footer-tagline">记录、思考与持续构建。</p>
+        </div>
+        <div class="footer-meta">
+          <p>© {new Date().getFullYear()} Gotorion</p>
+          <p>基于 Astro 构建 · Cloudflare Pages</p>
+        </div>
       </div>
     </footer>
   </body>
