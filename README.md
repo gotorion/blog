@@ -24,3 +24,9 @@ pubDate: 2026-11-10
 ```
 
 网站部署在 Cloudflare Pages：`https://gotorion-blog.pages.dev/`。
+
+## 字体
+
+网站使用仓耳今楷（Tsanger JinKai）02-W03，字体文件来自
+[仓耳字库官网](https://www.tsanger.cn/product/32)。该字体允许个人非商业免费使用；
+商业使用前需要向北京仓耳文字技术有限公司取得正式授权。

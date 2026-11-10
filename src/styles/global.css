@@ -7,11 +7,10 @@
   --accent: #c24f2f;
   --accent-dark: #8e341f;
   --max-width: 46rem;
-  --font-sans: Inter, "Noto Sans SC", "PingFang SC", "Microsoft YaHei",
-    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
-  --font-serif: "Noto Serif SC", "Songti SC", STSong, SimSun, Iowan Old Style,
-    Palatino Linotype, Book Antiqua, Georgia, serif;
+  --font-sans: "Tsanger JinKai", "TsangerJinKai02 W03", "Microsoft YaHei",
+    "PingFang SC", "Noto Sans SC", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Tsanger JinKai", "TsangerJinKai02 W03", "Songti SC", STSong,
+    SimSun, Iowan Old Style, Palatino Linotype, Book Antiqua, Georgia, serif;
 }
 
 * {
