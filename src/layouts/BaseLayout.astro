@@ -1,0 +1,48 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+const siteName = "Gotorion Blog";
+const pageTitle = title === siteName ? title : `${title} | ${siteName}`;
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+    <link rel="canonical" href={canonicalURL} />
+    <title>{pageTitle}</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="site-title" href={`${base}/`}>Gotorion Blog</a>
+        <nav aria-label="主导航">
+          <a href={`${base}/`}>文章</a>
+          <a href={`${base}/about/`}>关于</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <p>© {new Date().getFullYear()} Gotorion · 保留所有权利</p>
+      </div>
+    </footer>
+  </body>
+</html>
