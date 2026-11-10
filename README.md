@@ -23,4 +23,4 @@ pubDate: 2026-11-10
 ---
 ```
 
-网站已配置为 GitHub Pages 项目站点：`https://gotorion.github.io/blog/`。
+网站部署在 Cloudflare Pages：`https://gotorion-blog.pages.dev/`。
