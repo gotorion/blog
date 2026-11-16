@@ -1,29 +1,21 @@
 ---
+import { getEntry, render } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const entry = await getEntry("pages", "about");
+
+if (!entry) {
+  throw new Error("Missing about page content: src/content/pages/about.md");
+}
+
+const { Content } = await render(entry);
 ---
 
-<BaseLayout
-  title="关于"
-  description="关于李俊辉，以及这个网站。"
->
+<BaseLayout title={entry.data.title} description={entry.data.description}>
   <section class="page">
-    <div class="page-kicker">关于</div>
-    <h1>你好，我是李俊辉。</h1>
+    <div class="page-kicker">{entry.data.title}</div>
     <div class="prose">
-      <p>
-        我写软件，也做独立项目。这个网站是我的个人主页，也是我公开写作的地方。
-      </p>
-      <p>
-        我关心软件如何被构建、想法如何变成产品，以及人在其中如何保持清醒。写作对我来说，是一种把问题想清楚的方式，也是一种留下踪迹的方式。
-      </p>
-      <p>
-        博客里记录软件构建、独立项目和公开学习。你可以从
-        <a href={`${base}/blog/`}>这里</a>开始，也可以在
-        <a href="https://github.com/gotorion" rel="me">GitHub</a> 或
-        <a href="https://x.com/sigmoid1969" rel="me">X</a> 找到我。
-      </p>
+      <Content />
     </div>
   </section>
 </BaseLayout>
