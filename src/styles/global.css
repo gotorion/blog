@@ -586,16 +586,6 @@ code {
   opacity: 0;
   pointer-events: none;
   transition: opacity 1200ms ease;
-  -webkit-mask-image: radial-gradient(
-    ellipse 78% 78% at 52% 48%,
-    #000 30%,
-    transparent 80%
-  );
-  mask-image: radial-gradient(
-    ellipse 78% 78% at 52% 48%,
-    #000 30%,
-    transparent 80%
-  );
 }
 
 .hero-model.is-ready {

@@ -1,6 +1,7 @@
 ---
-// 首页右上角的 3D 点缀：程序化生成的曲面线框，不需要外部模型文件。
-// 这是全站唯一加载 three.js 的地方，样式见 global.css 的 .hero-model。
+// 首页的 3D 点缀：点阵聚散。几行标签由一层浮尘缓慢聚成，停留片刻再散开，
+// 鼠标靠近时局部会被推开。这是全站唯一加载 three.js 的地方，
+// 尺寸与位置见 global.css 的 .hero-model。
 ---
 
 <figure class="hero-model" data-hero-model-root aria-hidden="true">
@@ -12,17 +13,37 @@
     BufferAttribute,
     BufferGeometry,
     Color,
-    Group,
-    LineBasicMaterial,
-    LineSegments,
     PerspectiveCamera,
+    Points,
     Scene,
+    ShaderMaterial,
     WebGLRenderer,
   } from "three";
 
-  const SEGMENTS = 40;
-  const EXTENT = 1.12;
-  const MAX_HEIGHT = 0.52;
+  const LABELS = ["Life Learner", "Creator", "Investor"];
+  const TEXTURE_WIDTH = 2048;
+  const TEXTURE_HEIGHT = 1536;
+  const LINE_SPACING = 1.3;
+  const FONT_STACK = '"Tsanger JinKai", Georgia, serif';
+
+  const WORLD_WIDTH = 2.45;
+  const POINT_COUNT = 6500;
+  const CYCLE_SECONDS = 15;
+  const CAMERA_Z = 3.1;
+
+  const clamp01 = (value: number) => Math.min(Math.max(value, 0), 1);
+  const smooth = (value: number) => {
+    const t = clamp01(value);
+    return t * t * (3 - 2 * t);
+  };
+
+  // 固定种子，保证每次刷新点的分布一致。
+  const makeRandom = (seed: number) => () => {
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
 
   const readColor = (name: string, fallback: string) => {
     const value = getComputedStyle(document.documentElement)
@@ -31,66 +52,163 @@
     return new Color(value || fallback);
   };
 
-  const brand = readColor("--brand", "#1b365d");
-  const brandLight = readColor("--brand-light", "#2d5a8a");
-
-  // 一条沿 x 轴的 sigmoid 山脊，叠加轻微起伏，避免过于几何化。
-  const heightAt = (u: number, v: number) =>
-    0.42 * Math.tanh(2.0 * u) +
-    0.06 * Math.sin(v * 3.2) +
-    0.035 * Math.cos(u * 2.6 + v * 1.7);
-
-  const vertexAt = (u: number, v: number): [number, number, number] => [
-    u * EXTENT,
-    heightAt(u, v),
-    v * EXTENT,
-  ];
-
-  function buildLineGeometry(pick: "profile" | "cross") {
-    const step = 2 / SEGMENTS;
-    const positions: number[] = [];
-    const colors: number[] = [];
-    const tint = new Color();
-
-    const push = (ua: number, va: number, ub: number, vb: number) => {
-      for (const [u, v] of [
-        [ua, va],
-        [ub, vb],
-      ]) {
-        const [x, y, z] = vertexAt(u, v);
-        positions.push(x, y, z);
-        const t = Math.min(Math.max((y + MAX_HEIGHT) / (MAX_HEIGHT * 2), 0), 1);
-        tint.copy(brand).lerp(brandLight, t);
-        colors.push(tint.r, tint.g, tint.b);
-      }
-    };
-
-    for (let j = 0; j <= SEGMENTS; j++) {
-      const v = -1 + j * step;
-      for (let i = 0; i < SEGMENTS; i++) {
-        const u = -1 + i * step;
-        if (pick === "profile") push(u, v, u + step, v);
-        else if (j < SEGMENTS) push(u, v, u, v + step);
+  async function drawText() {
+    if ("fonts" in document) {
+      try {
+        await document.fonts.load(
+          `400 200px "Tsanger JinKai"`,
+          LABELS.join(""),
+        );
+      } catch {
+        // 字体加载失败时退回 serif
       }
     }
 
-    const geometry = new BufferGeometry();
-    geometry.setAttribute(
-      "position",
-      new BufferAttribute(new Float32Array(positions), 3),
-    );
-    geometry.setAttribute(
-      "color",
-      new BufferAttribute(new Float32Array(colors), 3),
-    );
-    return geometry;
+    const canvas = document.createElement("canvas");
+    canvas.width = TEXTURE_WIDTH;
+    canvas.height = TEXTURE_HEIGHT;
+    const context = canvas.getContext("2d");
+    if (!context) return null;
+
+    const widthAt = (text: string, size: number) => {
+      context.font = `400 ${size}px ${FONT_STACK}`;
+      return context.measureText(text).width;
+    };
+
+    // 同时受宽度和高度约束；三行标签取较小的字号，保证整块放得下。
+    const widestAt100 = Math.max(...LABELS.map((label) => widthAt(label, 100)));
+    const widthLimit = ((canvas.width * 0.9) / widestAt100) * 100;
+    const heightLimit =
+      (canvas.height * 0.82) / (LABELS.length * LINE_SPACING);
+    const size = Math.min(widthLimit, heightLimit);
+
+    const widths = LABELS.map((label) => widthAt(label, size));
+    const blockWidth = Math.max(...widths);
+    const lineHeight = size * LINE_SPACING;
+    const blockHeight = (LABELS.length - 1) * lineHeight + size;
+    const startX = (canvas.width - blockWidth) / 2;
+    const startY = (canvas.height - blockHeight) / 2 + size / 2;
+
+    context.font = `400 ${size}px ${FONT_STACK}`;
+    context.fillStyle = "#fff";
+    context.textAlign = "left";
+    context.textBaseline = "middle";
+
+    LABELS.forEach((label, index) => {
+      context.fillText(label, startX, startY + index * lineHeight);
+    });
+
+    return canvas;
   }
 
-  function setup(canvas: HTMLCanvasElement) {
+  function sampleTargets(textCanvas: HTMLCanvasElement) {
+    const context = textCanvas.getContext("2d", { willReadFrequently: true });
+    if (!context) return null;
+
+    const { width, height } = textCanvas;
+    const pixels = context.getImageData(0, 0, width, height).data;
+    const random = makeRandom(0x51ed270b);
+    const worldHeight = (WORLD_WIDTH * height) / width;
+    const target = new Float32Array(POINT_COUNT * 3);
+
+    let count = 0;
+    let attempts = 0;
+    while (count < POINT_COUNT && attempts < POINT_COUNT * 160) {
+      attempts++;
+      const px = Math.floor(random() * width);
+      const py = Math.floor(random() * height);
+      if (pixels[(py * width + px) * 4 + 3]! < 128) continue;
+
+      target[count * 3] =
+        (px / width - 0.5) * WORLD_WIDTH + (random() - 0.5) * 0.004;
+      target[count * 3 + 1] =
+        -(py / height - 0.5) * worldHeight + (random() - 0.5) * 0.004;
+      target[count * 3 + 2] = (random() - 0.5) * 0.05;
+      count++;
+    }
+
+    return { target, count };
+  }
+
+  function buildPoints(
+    textCanvas: HTMLCanvasElement,
+    brand: Color,
+    pixelRatio: number,
+  ) {
+    const sampled = sampleTargets(textCanvas);
+    if (!sampled) return null;
+    const { target, count } = sampled;
+
+    const random = makeRandom(0xc2b2ae35);
+    const positions = new Float32Array(count * 3);
+    const scatter = new Float32Array(count * 3);
+    const phases = new Float32Array(count);
+    const alphas = new Float32Array(count);
+    const sizes = new Float32Array(count);
+
+    for (let i = 0; i < count; i++) {
+      const i3 = i * 3;
+      scatter[i3] = (random() - 0.5) * 2.4;
+      scatter[i3 + 1] = (random() - 0.5) * 1.8;
+      scatter[i3 + 2] = (random() - 0.5) * 0.7;
+      phases[i] = random();
+      sizes[i] = 1.1 + random() * 0.9;
+      positions[i3] = scatter[i3];
+      positions[i3 + 1] = scatter[i3 + 1];
+      positions[i3 + 2] = scatter[i3 + 2];
+      alphas[i] = 0.12;
+    }
+
+    const geometry = new BufferGeometry();
+    geometry.setAttribute("position", new BufferAttribute(positions, 3));
+    geometry.setAttribute("aAlpha", new BufferAttribute(alphas, 1));
+    geometry.setAttribute("aSize", new BufferAttribute(sizes, 1));
+
+    const material = new ShaderMaterial({
+      uniforms: {
+        uColor: { value: brand },
+        uPixelRatio: { value: pixelRatio },
+      },
+      vertexShader: `
+        attribute float aAlpha;
+        attribute float aSize;
+        uniform float uPixelRatio;
+        varying float vAlpha;
+
+        void main() {
+          vAlpha = aAlpha;
+          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+          gl_PointSize = aSize * uPixelRatio * (3.1 / -mvPosition.z);
+          gl_Position = projectionMatrix * mvPosition;
+        }
+      `,
+      fragmentShader: `
+        uniform vec3 uColor;
+        varying float vAlpha;
+
+        void main() {
+          float dist = length(gl_PointCoord - 0.5);
+          if (dist > 0.5) discard;
+          float alpha = (1.0 - smoothstep(0.36, 0.5, dist)) * vAlpha;
+          gl_FragColor = vec4(uColor, alpha);
+        }
+      `,
+      transparent: true,
+      depthWrite: false,
+      depthTest: false,
+    });
+
+    const points = new Points(geometry, material);
+    points.frustumCulled = false;
+
+    return { points, geometry, material, target, scatter, phases };
+  }
+
+  function setup(canvas: HTMLCanvasElement, textCanvas: HTMLCanvasElement) {
     let renderer: WebGLRenderer;
     try {
       renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true });
-    } catch (error) {
+    } catch {
       canvas.closest("[data-hero-model-root]")?.setAttribute(
         "data-webgl",
         "unsupported",
@@ -98,43 +216,91 @@
       return;
     }
 
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+    renderer.setPixelRatio(pixelRatio);
     renderer.setClearAlpha(0);
 
+    // ShaderMaterial 不经过输出色彩空间转换，这里直接传 sRGB 分量。
+    const brand = readColor("--brand", "#1b365d").convertLinearToSRGB();
+    const built = buildPoints(textCanvas, brand, pixelRatio);
+    if (!built) return;
+
+    const { points, geometry, target, scatter, phases } = built;
+    const count = phases.length;
+
     const scene = new Scene();
-    const camera = new PerspectiveCamera(38, 1, 0.1, 20);
-    camera.position.set(0, 1.45, 3.15);
+    const camera = new PerspectiveCamera(34, 1, 0.1, 20);
+    camera.position.set(0, 0.1, CAMERA_Z);
     camera.lookAt(0, 0, 0);
+    scene.add(points);
 
-    const group = new Group();
-    group.rotation.y = -0.62;
+    const positions = geometry.getAttribute("position")
+      .array as Float32Array;
+    const alphas = geometry.getAttribute("aAlpha").array as Float32Array;
 
-    const profileLines = new LineSegments(
-      buildLineGeometry("profile"),
-      new LineBasicMaterial({
-        vertexColors: true,
-        transparent: true,
-        opacity: 0.78,
-        depthWrite: false,
-      }),
-    );
-    const crossLines = new LineSegments(
-      buildLineGeometry("cross"),
-      new LineBasicMaterial({
-        vertexColors: true,
-        transparent: true,
-        opacity: 0.22,
-        depthWrite: false,
-      }),
-    );
-    group.add(profileLines, crossLines);
-    scene.add(group);
+    const pointer = { x: 0, y: 0, active: false };
+    let viewWidth = 1;
+    let viewHeight = 1;
+
+    const formationAt = (time: number) => {
+      const cycle = (time % CYCLE_SECONDS) / CYCLE_SECONDS;
+      if (cycle < 0.38) return smooth(cycle / 0.38);
+      if (cycle < 0.66) return 1;
+      return 1 - smooth((cycle - 0.66) / 0.34);
+    };
+
+    const update = (time: number) => {
+      const formed = formationAt(time);
+
+      for (let i = 0; i < count; i++) {
+        const i3 = i * 3;
+        const phase = phases[i]!;
+        const local = smooth((formed - phase * 0.18) / 0.82);
+        const seed = phase * Math.PI * 2;
+
+        const sx = scatter[i3]! + Math.sin(time * 0.25 + seed) * 0.05;
+        const sy = scatter[i3 + 1]! + Math.cos(time * 0.19 + seed) * 0.04;
+        const sz = scatter[i3 + 2]! + Math.sin(time * 0.3 + seed) * 0.05;
+        const tx = target[i3]! + Math.sin(time * 0.9 + seed) * 0.003;
+        const ty = target[i3 + 1]! + Math.cos(time * 0.8 + seed) * 0.003;
+        const tz = target[i3 + 2]!;
+
+        let x = sx + (tx - sx) * local;
+        let y = sy + (ty - sy) * local;
+        let z = sz + (tz - sz) * local;
+
+        if (pointer.active) {
+          const dx = x - pointer.x;
+          const dy = y - pointer.y;
+          const distanceSquared = dx * dx + dy * dy;
+          const radius = 0.32;
+          if (distanceSquared < radius * radius) {
+            const distance = Math.sqrt(distanceSquared) || 0.0001;
+            const force = 1 - distance / radius;
+            const push = force * force * 0.22;
+            x += (dx / distance) * push;
+            y += (dy / distance) * push;
+            z += push * 0.4;
+          }
+        }
+
+        positions[i3] = x;
+        positions[i3 + 1] = y;
+        positions[i3 + 2] = z;
+        alphas[i] = 0.1 + local * 0.85;
+      }
+
+      geometry.getAttribute("position").needsUpdate = true;
+      geometry.getAttribute("aAlpha").needsUpdate = true;
+      points.rotation.y = Math.sin(time * 0.12) * 0.05;
+    };
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     let rafId = 0;
     let last = 0;
     let inView = true;
     let ready = false;
+    let time = CYCLE_SECONDS * 0.4;
 
     const render = () => {
       renderer.render(scene, camera);
@@ -148,7 +314,8 @@
       rafId = requestAnimationFrame(tick);
       const delta = Math.min((now - last) / 1000, 0.05);
       last = now;
-      group.rotation.y += delta * 0.12;
+      time += delta;
+      update(time);
       render();
     };
 
@@ -176,8 +343,23 @@
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
+
+      viewHeight = 2 * CAMERA_Z * Math.tan((34 * Math.PI) / 360);
+      viewWidth = viewHeight * camera.aspect;
+
+      update(time);
       render();
     };
+
+    window.addEventListener("pointermove", (event) => {
+      const rect = canvas.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const u = (event.clientX - rect.left) / rect.width;
+      const v = (event.clientY - rect.top) / rect.height;
+      pointer.active = u > -0.4 && u < 1.4 && v > -0.4 && v < 1.4;
+      pointer.x = (u - 0.5) * viewWidth;
+      pointer.y = -(v - 0.5) * viewHeight;
+    });
 
     new ResizeObserver(resize).observe(canvas);
     new IntersectionObserver(
@@ -198,7 +380,10 @@
     else start();
   }
 
-  document
-    .querySelectorAll<HTMLCanvasElement>("[data-hero-model]")
-    .forEach((canvas) => setup(canvas));
+  const textCanvas = await drawText();
+  if (textCanvas) {
+    document
+      .querySelectorAll<HTMLCanvasElement>("[data-hero-model]")
+      .forEach((canvas) => setup(canvas, textCanvas));
+  }
 </script>

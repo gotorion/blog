@@ -20,7 +20,7 @@ Gotorion Blog：中文个人博客。Astro 7 + Markdown 内容集合，无 UI/CS
 src/
   content.config.ts      blog 集合 schema
   content/blog/*.md      文章；文件名即 URL slug
-  components/            HeroModel.astro（首页 three.js 曲面，程序化生成，无模型文件）
+  components/            HeroModel.astro（首页 three.js 点阵标签，程序化生成，无模型文件）
   layouts/               BaseLayout（全站外壳、导航、社交链接）、BlogPostLayout（文章页）
   pages/                 index.astro（个人主页）、blog/index.astro（博客列表）、blog/[...slug].astro（文章页）
   styles/global.css      全部样式与设计令牌
