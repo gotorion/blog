@@ -20,7 +20,7 @@
 src/
   content.config.ts      blog 集合 schema
   content/blog/*.md      文章；文件名即 URL slug
-  components/            HeroModel.astro（首页 three.js 点阵标签，程序化生成，无模型文件）
+  components/            HeroModel.astro（首页 three.js 点阵标签，程序化生成，无模型文件）、TableOfContents.astro（文章页目录）
   layouts/               BaseLayout（全站外壳、导航、社交链接）、BlogPostLayout（文章页）
   pages/                 index.astro（个人主页）、blog/index.astro（博客列表）、blog/[...slug].astro（文章页）
   styles/global.css      全部样式与设计令牌
@@ -42,7 +42,7 @@ public/fonts/            仓耳今楷字体（仅个人非商业授权）
 - 站内链接与静态资源带 base 前缀：`const base = import.meta.env.BASE_URL.replace(/\/$/, "")`，再用 `${base}/path/`。
 - 界面语言为中文（`<html lang="zh-CN">`）；日期用 `zh-CN`、`timeZone: "UTC"` 格式化。
 - 设计基调：暖纸色背景、深蓝强调色、衬线正文、克制排版；动效只保留首页 3D 的缓慢自转，必须尊重 `prefers-reduced-motion`。
-- 响应式断点：880px / 480px / 360px。
+- 响应式断点：1040px（文章目录从右侧栏收回折叠）/ 880px / 480px / 360px。
 
 ## 改哪里
 
@@ -50,7 +50,7 @@ public/fonts/            仓耳今楷字体（仅个人非商业授权）
 - 个人主页文案：`src/pages/index.astro`。
 - 首页 3D 点缀：`src/components/HeroModel.astro`（曲面形状、配色、动画）；尺寸与遮罩在 `global.css` 的 `.hero-model`。
 - 博客列表：`src/pages/blog/index.astro`。
-- 文章页结构：`src/layouts/BlogPostLayout.astro`。
+- 文章页结构：`src/layouts/BlogPostLayout.astro`；目录与阅读进度条也在其中（目录条目来自 `TableOfContents.astro`，布局与样式在 `global.css` 的 `.post-body`、`.reading-progress`）。
 - 站点地址：`astro.config.mjs`。
 
 ## 禁止

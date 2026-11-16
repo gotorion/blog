@@ -1,5 +1,7 @@
 ---
+import type { MarkdownHeading } from "astro";
 import BaseLayout from "./BaseLayout.astro";
+import TableOfContents from "../components/TableOfContents.astro";
 
 interface Props {
   title: string;
@@ -7,6 +9,7 @@ interface Props {
   pubDate: Date;
   updatedDate?: Date;
   tags?: string[];
+  headings?: MarkdownHeading[];
 }
 
 const {
@@ -15,8 +18,14 @@ const {
   pubDate,
   updatedDate,
   tags = [],
+  headings = [],
 } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+const tocItems = headings.filter(
+  (heading) => heading.depth === 2 || heading.depth === 3,
+);
+const showToc = tocItems.length >= 2;
 
 const formatDate = (date: Date) =>
   date
@@ -33,6 +42,7 @@ const updated = updatedDate ? formatDate(updatedDate) : undefined;
 ---
 
 <BaseLayout title={title} description={description}>
+  <div class="reading-progress" aria-hidden="true"></div>
   <article class="post">
     <header class="post-header">
       <div class="post-kicker">
@@ -50,8 +60,30 @@ const updated = updatedDate ? formatDate(updatedDate) : undefined;
       }
     </header>
 
-    <div class="prose">
-      <slot />
+    <div class="post-body">
+      {
+        showToc && (
+          <details class="post-toc-mobile">
+            <summary>目录</summary>
+            <TableOfContents headings={tocItems} />
+          </details>
+        )
+      }
+
+      <div class="prose">
+        <slot />
+      </div>
+
+      {
+        showToc && (
+          <aside class="post-aside">
+            <nav class="post-toc" aria-label="文章目录">
+              <p class="post-toc-title">目录</p>
+              <TableOfContents headings={tocItems} />
+            </nav>
+          </aside>
+        )
+      }
     </div>
 
     <footer class="post-footer">
