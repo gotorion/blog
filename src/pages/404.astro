@@ -4,7 +4,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 ---
 
-<BaseLayout title="页面不存在" description="你访问的页面不存在。">
+<BaseLayout title="页面不存在" description="你访问的页面不存在。" noindex>
   <section class="page not-found">
     <div class="page-kicker">404</div>
     <h1>这个页面不见了。</h1>

@@ -3,16 +3,37 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import HeroModel from "../components/HeroModel.astro";
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const siteURL = new URL(`${base}/`, Astro.site).href;
 const socialLinks = {
   github: "https://github.com/gotorion",
   x: "https://x.com/sigmoid1969",
   linkedin: "https://www.linkedin.com/in/li-junhui-944178280/",
 };
+const structuredData = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: "李俊辉",
+    alternateName: "Junhui Li",
+    url: siteURL,
+    sameAs: [socialLinks.github, socialLinks.x, socialLinks.linkedin],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "李俊辉",
+    alternateName: "lijunhui.me",
+    url: siteURL,
+    inLanguage: "zh-CN",
+    publisher: { "@type": "Person", name: "李俊辉", url: siteURL },
+  },
+];
 ---
 
 <BaseLayout
   title="李俊辉"
   description="李俊辉（lijunhui.me）的个人主页。写软件，做独立项目，记录过程中的思考。"
+  structuredData={structuredData}
 >
   <section class="home-hero">
     <div class="home-hero-main">

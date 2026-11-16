@@ -39,9 +39,33 @@ const formatDate = (date: Date) =>
 
 const published = formatDate(pubDate);
 const updated = updatedDate ? formatDate(updatedDate) : undefined;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site).href;
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: title,
+  description,
+  datePublished: pubDate.toISOString(),
+  dateModified: (updatedDate ?? pubDate).toISOString(),
+  inLanguage: "zh-CN",
+  url: canonicalURL,
+  mainEntityOfPage: { "@type": "WebPage", "@id": canonicalURL },
+  author: { "@type": "Person", name: "李俊辉", url: "https://lijunhui.me/" },
+  publisher: { "@type": "Person", name: "李俊辉", url: "https://lijunhui.me/" },
+  ...(tags.length > 0 ? { keywords: tags.join(",") } : {}),
+};
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout
+  title={title}
+  description={description}
+  type="article"
+  publishedTime={pubDate}
+  modifiedTime={updatedDate}
+  tags={tags}
+  structuredData={articleSchema}
+>
   <div class="reading-progress" aria-hidden="true"></div>
   <article class="post">
     <header class="post-header">
