@@ -4,6 +4,7 @@ dist/
 # generated types
 .astro/
 .wrangler/
+.taste-skill/
 
 # dependencies
 node_modules/

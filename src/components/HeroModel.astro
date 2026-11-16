@@ -1,0 +1,204 @@
+---
+// 首页右上角的 3D 点缀：程序化生成的曲面线框，不需要外部模型文件。
+// 这是全站唯一加载 three.js 的地方，样式见 global.css 的 .hero-model。
+---
+
+<figure class="hero-model" data-hero-model-root aria-hidden="true">
+  <canvas class="hero-model-canvas" data-hero-model></canvas>
+</figure>
+
+<script>
+  import {
+    BufferAttribute,
+    BufferGeometry,
+    Color,
+    Group,
+    LineBasicMaterial,
+    LineSegments,
+    PerspectiveCamera,
+    Scene,
+    WebGLRenderer,
+  } from "three";
+
+  const SEGMENTS = 40;
+  const EXTENT = 1.12;
+  const MAX_HEIGHT = 0.52;
+
+  const readColor = (name: string, fallback: string) => {
+    const value = getComputedStyle(document.documentElement)
+      .getPropertyValue(name)
+      .trim();
+    return new Color(value || fallback);
+  };
+
+  const brand = readColor("--brand", "#1b365d");
+  const brandLight = readColor("--brand-light", "#2d5a8a");
+
+  // 一条沿 x 轴的 sigmoid 山脊，叠加轻微起伏，避免过于几何化。
+  const heightAt = (u: number, v: number) =>
+    0.42 * Math.tanh(2.0 * u) +
+    0.06 * Math.sin(v * 3.2) +
+    0.035 * Math.cos(u * 2.6 + v * 1.7);
+
+  const vertexAt = (u: number, v: number): [number, number, number] => [
+    u * EXTENT,
+    heightAt(u, v),
+    v * EXTENT,
+  ];
+
+  function buildLineGeometry(pick: "profile" | "cross") {
+    const step = 2 / SEGMENTS;
+    const positions: number[] = [];
+    const colors: number[] = [];
+    const tint = new Color();
+
+    const push = (ua: number, va: number, ub: number, vb: number) => {
+      for (const [u, v] of [
+        [ua, va],
+        [ub, vb],
+      ]) {
+        const [x, y, z] = vertexAt(u, v);
+        positions.push(x, y, z);
+        const t = Math.min(Math.max((y + MAX_HEIGHT) / (MAX_HEIGHT * 2), 0), 1);
+        tint.copy(brand).lerp(brandLight, t);
+        colors.push(tint.r, tint.g, tint.b);
+      }
+    };
+
+    for (let j = 0; j <= SEGMENTS; j++) {
+      const v = -1 + j * step;
+      for (let i = 0; i < SEGMENTS; i++) {
+        const u = -1 + i * step;
+        if (pick === "profile") push(u, v, u + step, v);
+        else if (j < SEGMENTS) push(u, v, u, v + step);
+      }
+    }
+
+    const geometry = new BufferGeometry();
+    geometry.setAttribute(
+      "position",
+      new BufferAttribute(new Float32Array(positions), 3),
+    );
+    geometry.setAttribute(
+      "color",
+      new BufferAttribute(new Float32Array(colors), 3),
+    );
+    return geometry;
+  }
+
+  function setup(canvas: HTMLCanvasElement) {
+    let renderer: WebGLRenderer;
+    try {
+      renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true });
+    } catch (error) {
+      canvas.closest("[data-hero-model-root]")?.setAttribute(
+        "data-webgl",
+        "unsupported",
+      );
+      return;
+    }
+
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setClearAlpha(0);
+
+    const scene = new Scene();
+    const camera = new PerspectiveCamera(38, 1, 0.1, 20);
+    camera.position.set(0, 1.45, 3.15);
+    camera.lookAt(0, 0, 0);
+
+    const group = new Group();
+    group.rotation.y = -0.62;
+
+    const profileLines = new LineSegments(
+      buildLineGeometry("profile"),
+      new LineBasicMaterial({
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.78,
+        depthWrite: false,
+      }),
+    );
+    const crossLines = new LineSegments(
+      buildLineGeometry("cross"),
+      new LineBasicMaterial({
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.22,
+        depthWrite: false,
+      }),
+    );
+    group.add(profileLines, crossLines);
+    scene.add(group);
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let rafId = 0;
+    let last = 0;
+    let inView = true;
+    let ready = false;
+
+    const render = () => {
+      renderer.render(scene, camera);
+      if (!ready) {
+        ready = true;
+        canvas.closest("[data-hero-model-root]")?.classList.add("is-ready");
+      }
+    };
+
+    const tick = (now: number) => {
+      rafId = requestAnimationFrame(tick);
+      const delta = Math.min((now - last) / 1000, 0.05);
+      last = now;
+      group.rotation.y += delta * 0.12;
+      render();
+    };
+
+    const start = () => {
+      if (rafId || reducedMotion.matches) return;
+      last = performance.now();
+      rafId = requestAnimationFrame(tick);
+    };
+
+    const stop = () => {
+      if (!rafId) return;
+      cancelAnimationFrame(rafId);
+      rafId = 0;
+    };
+
+    const sync = () => {
+      if (document.hidden || !inView) stop();
+      else start();
+    };
+
+    const resize = () => {
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+      if (!width || !height) return;
+      renderer.setSize(width, height, false);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      render();
+    };
+
+    new ResizeObserver(resize).observe(canvas);
+    new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        inView = entry.isIntersecting;
+        sync();
+      },
+      { threshold: 0 },
+    ).observe(canvas);
+
+    document.addEventListener("visibilitychange", sync);
+    reducedMotion.addEventListener("change", sync);
+
+    resize();
+    if (reducedMotion.matches) render();
+    else start();
+  }
+
+  document
+    .querySelectorAll<HTMLCanvasElement>("[data-hero-model]")
+    .forEach((canvas) => setup(canvas));
+</script>

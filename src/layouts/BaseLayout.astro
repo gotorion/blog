@@ -26,6 +26,17 @@ const socialLinks = {
   wechat: "https://mp.weixin.qq.com/",
   xiaohongshu: "https://www.xiaohongshu.com/",
 };
+const navItems = [
+  { href: `${base}/`, label: "首页", exact: true },
+  { href: `${base}/blog/`, label: "博客" },
+  { href: `${base}/about/`, label: "关于" },
+];
+const currentPath = Astro.url.pathname;
+const isActive = (item: { href: string; exact?: boolean }) => {
+  if (item.exact) return currentPath === item.href;
+  const target = item.href.replace(/\/$/, "");
+  return currentPath === target || currentPath.startsWith(`${target}/`);
+};
 ---
 
 <!doctype html>
@@ -52,8 +63,17 @@ const socialLinks = {
         </a>
         <nav class="site-nav" aria-label="主导航">
           <div class="nav-links">
-            <a href={`${base}/`}>文章</a>
-            <a href={`${base}/about/`}>关于</a>
+            {
+              navItems.map((item) => (
+                <a
+                  href={item.href}
+                  class:list={{ "is-active": isActive(item) }}
+                  aria-current={isActive(item) ? "page" : undefined}
+                >
+                  {item.label}
+                </a>
+              ))
+            }
           </div>
           <span class="nav-divider" aria-hidden="true"></span>
           <div class="nav-social" role="group" aria-label="社交媒体">

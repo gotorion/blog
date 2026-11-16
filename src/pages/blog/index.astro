@@ -1,0 +1,62 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+---
+
+<BaseLayout
+  title="博客"
+  description="记录软件构建、公开学习与独立项目的思考和实践。"
+>
+  <section class="blog-index">
+    <header class="blog-index-header">
+      <h1>博客</h1>
+      <p>记录软件构建、公开学习与独立项目的思考和实践。</p>
+      <p class="blog-index-count">共 {posts.length} 篇</p>
+    </header>
+
+    <div class="blog-index-body">
+      {
+        posts.length > 0 ? (
+          <ul class="post-list">
+            {posts.map((post) => (
+              <li>
+                <article class="post-row">
+                  <div class="post-row-meta">
+                    <time datetime={post.data.pubDate.toISOString()}>
+                      {post.data.pubDate.toLocaleDateString("zh-CN", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        timeZone: "UTC",
+                      })}
+                    </time>
+                  </div>
+                  <div class="post-row-content">
+                    <h3>
+                      <a href={`${base}/blog/${post.id}/`}>{post.data.title}</a>
+                    </h3>
+                    <p>{post.data.description}</p>
+                    {
+                      post.data.tags.length > 0 && (
+                        <ul class="post-tags" aria-label="文章标签">
+                          {post.data.tags.map((tag) => <li>{tag}</li>)}
+                        </ul>
+                      )
+                    }
+                  </div>
+                </article>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="empty-state">还没有文章。</p>
+        )
+      }
+    </div>
+  </section>
+</BaseLayout>
