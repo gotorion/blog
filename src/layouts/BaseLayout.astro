@@ -14,7 +14,7 @@ interface Props {
 }
 
 const { title, description } = Astro.props;
-const siteName = "Gotorion Blog";
+const siteName = "李俊辉";
 const pageTitle = title === siteName ? title : `${title} | ${siteName}`;
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
@@ -49,6 +49,17 @@ const isActive = (item: { href: string; exact?: boolean }) => {
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
     <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href={`${base}/favicon-32.png`}
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href={`${base}/apple-touch-icon.png`}
+    />
+    <link
       rel="stylesheet"
       href={`${base}/fonts/tsanger-jinkai/result.css`}
     />
@@ -59,7 +70,7 @@ const isActive = (item: { href: string; exact?: boolean }) => {
     <header class="site-header">
       <div class="container header-inner">
         <a class="site-title" href={`${base}/`}>
-          Gotorion <span>Blog</span>
+          李俊辉 <span>lijunhui.me</span>
         </a>
         <nav class="site-nav" aria-label="主导航">
           <div class="nav-links">
@@ -157,14 +168,89 @@ const isActive = (item: { href: string; exact?: boolean }) => {
     <footer class="site-footer">
       <div class="container footer-inner">
         <div class="footer-mark">
-          <p class="footer-title">Gotorion Blog</p>
+          <p class="footer-title">李俊辉</p>
           <p class="footer-tagline">记录、思考与持续构建。</p>
         </div>
         <div class="footer-meta">
-          <p>© {new Date().getFullYear()} Gotorion</p>
+          <p>© {new Date().getFullYear()} 李俊辉 · lijunhui.me</p>
           <p>基于 Astro 构建 · Cloudflare Pages</p>
         </div>
       </div>
     </footer>
+
+    <script>
+      // Chrome 不播放 SVG favicon 内的动画，这里逐帧替换图标来「漏沙」。
+      const rows = [
+        { y: 14, xs: [12, 22, 32, 42, 52] },
+        { y: 23, xs: [22, 32, 42] },
+        { y: 32, xs: [32] },
+        { y: 41, xs: [22, 32, 42] },
+        { y: 50, xs: [12, 22, 32, 42, 52] },
+      ];
+      // 每一行在每一帧的不透明度：上斗逐行漏空，下斗逐行积起。
+      const frames = [
+        [1, 1, 1, 0.18, 0.18],
+        [0.18, 1, 1, 0.18, 1],
+        [0.18, 0.18, 1, 1, 1],
+        [0.18, 0.18, 0.18, 1, 1],
+      ];
+      const icon = document.querySelector<HTMLLinkElement>(
+        'link[rel="icon"][type="image/svg+xml"]',
+      );
+
+      if (icon) {
+        const render = (opacities: number[]) => {
+          const groups = rows
+            .map((row, index) => {
+              const dots = row.xs
+                .map((x) => `<circle cx="${x}" cy="${row.y}" r="3.5"/>`)
+                .join("");
+              return `<g opacity="${opacities[index] ?? 1}">${dots}</g>`;
+            })
+            .join("");
+          const svg =
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">' +
+            '<rect width="64" height="64" rx="12" fill="#1b365d"/>' +
+            `<g fill="#faf9f5">${groups}</g></svg>`;
+          icon.setAttribute(
+            "href",
+            `data:image/svg+xml,${encodeURIComponent(svg)}`,
+          );
+        };
+
+        const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+        let frame = 0;
+        let timer = 0;
+
+        const paint = () => {
+          render(frames[frame] ?? frames[0] ?? []);
+          frame = (frame + 1) % frames.length;
+        };
+
+        const start = () => {
+          if (timer || reduced.matches) return;
+          paint();
+          timer = window.setInterval(paint, 1500);
+        };
+
+        const stop = () => {
+          window.clearInterval(timer);
+          timer = 0;
+        };
+
+        document.addEventListener("visibilitychange", () => {
+          if (document.hidden) stop();
+          else start();
+        });
+        reduced.addEventListener("change", () => {
+          stop();
+          if (reduced.matches) render(frames[0] ?? []);
+          else start();
+        });
+
+        if (reduced.matches) render(frames[0] ?? []);
+        else start();
+      }
+    </script>
   </body>
 </html>

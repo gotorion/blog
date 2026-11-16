@@ -2,7 +2,7 @@
 
 ## 项目
 
-Gotorion Blog：中文个人博客。Astro 7 + Markdown 内容集合，无 UI/CSS 框架，原生 CSS，部署于 Cloudflare Pages。首页有一处 three.js 的 3D 点缀。
+李俊辉（lijunhui.me）：中文个人站点。Astro 7 + Markdown 内容集合，无 UI/CSS 框架，原生 CSS，部署于 Cloudflare Pages。首页有一处 three.js 的点阵点缀。
 
 ## 命令
 
@@ -36,7 +36,7 @@ public/fonts/            仓耳今楷字体（仅个人非商业授权）
 
 ## 代码规范
 
-- Astro 组件 + 原生 CSS；不引入 UI 框架、CSS 框架。客户端脚本只允许 `src/components/HeroModel.astro` 这一处（three.js），其余页面保持零客户端脚本。
+- Astro 组件 + 原生 CSS；不引入 UI 框架、CSS 框架。客户端脚本仅两处：`src/components/HeroModel.astro`（three.js）和 `BaseLayout.astro` 里的 favicon 逐帧动画，其余保持零客户端脚本。
 - 组件用 frontmatter TypeScript，props 定义 `interface Props`；遵循 `astro/tsconfigs/strict`。
 - 样式集中在 `global.css`；颜色、字体、宽度一律用 `:root` 变量，不写死色值。three.js 里的颜色从 CSS 变量读取，不重复写色值。
 - 站内链接与静态资源带 base 前缀：`const base = import.meta.env.BASE_URL.replace(/\/$/, "")`，再用 `${base}/path/`。
@@ -61,4 +61,4 @@ public/fonts/            仓耳今楷字体（仅个人非商业授权）
 
 ## 部署
 
-`npm run build` 输出 `dist/`，由 Cloudflare Pages 托管：<https://gotorion-blog.pages.dev/>。
+`npm run build` 输出 `dist/`，由 Cloudflare Pages 托管：<https://lijunhui.me/>。

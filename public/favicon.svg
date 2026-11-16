@@ -1,4 +1,76 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#20201d"/>
-  <path d="M46 19H31c-7.7 0-14 6.3-14 14s6.3 14 14 14h13V34H32" fill="none" stroke="#f7f6f2" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect width="64" height="64" rx="12" fill="#1b365d" />
+  <g fill="#faf9f5">
+    <!-- 上斗第一行：先漏空 -->
+    <g>
+      <animate
+        attributeName="opacity"
+        values="1;1;0.18;0.18;1"
+        keyTimes="0;0.13;0.37;0.9;1"
+        dur="6s"
+        repeatCount="indefinite"
+      />
+      <circle cx="12" cy="14" r="3.5" />
+      <circle cx="22" cy="14" r="3.5" />
+      <circle cx="32" cy="14" r="3.5" />
+      <circle cx="42" cy="14" r="3.5" />
+      <circle cx="52" cy="14" r="3.5" />
+    </g>
+
+    <!-- 上斗第二行 -->
+    <g>
+      <animate
+        attributeName="opacity"
+        values="1;1;0.18;0.18;1"
+        keyTimes="0;0.37;0.57;0.9;1"
+        dur="6s"
+        repeatCount="indefinite"
+      />
+      <circle cx="22" cy="23" r="3.5" />
+      <circle cx="32" cy="23" r="3.5" />
+      <circle cx="42" cy="23" r="3.5" />
+    </g>
+
+    <!-- 颈口 -->
+    <g>
+      <animate
+        attributeName="opacity"
+        values="1;1;0.18;0.18;1"
+        keyTimes="0;0.57;0.7;0.9;1"
+        dur="6s"
+        repeatCount="indefinite"
+      />
+      <circle cx="32" cy="32" r="3.5" />
+    </g>
+
+    <!-- 下斗第二行：随后积起 -->
+    <g>
+      <animate
+        attributeName="opacity"
+        values="0.18;0.18;1;1;0.18"
+        keyTimes="0;0.37;0.57;0.9;1"
+        dur="6s"
+        repeatCount="indefinite"
+      />
+      <circle cx="22" cy="41" r="3.5" />
+      <circle cx="32" cy="41" r="3.5" />
+      <circle cx="42" cy="41" r="3.5" />
+    </g>
+
+    <!-- 下斗第一行：先积起 -->
+    <g>
+      <animate
+        attributeName="opacity"
+        values="0.18;0.18;1;1;0.18"
+        keyTimes="0;0.13;0.37;0.9;1"
+        dur="6s"
+        repeatCount="indefinite"
+      />
+      <circle cx="12" cy="50" r="3.5" />
+      <circle cx="22" cy="50" r="3.5" />
+      <circle cx="32" cy="50" r="3.5" />
+      <circle cx="42" cy="50" r="3.5" />
+      <circle cx="52" cy="50" r="3.5" />
+    </g>
+  </g>
 </svg>
