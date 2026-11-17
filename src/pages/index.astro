@@ -1,9 +1,14 @@
 ---
+import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import HeroModel from "../components/HeroModel.astro";
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const siteURL = new URL(`${base}/`, Astro.site).href;
+const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+const latestPosts = posts.slice(0, 3);
 const socialLinks = {
   github: "https://github.com/gotorion",
   x: "https://x.com/sigmoid1969",
@@ -37,35 +42,11 @@ const structuredData = [
 >
   <section class="home-hero">
     <div class="home-hero-main">
-      <p class="home-hero-rubric">JUNHUI LI · LIJUNHUI.ME</p>
+      <p class="home-hero-rubric">独立开发者 · 写作者</p>
       <h1>李俊辉</h1>
       <p class="home-hero-sub">
         写软件，做独立项目，也在这里记录过程中的思考。
       </p>
-      <dl class="home-hero-meta">
-        <dt>写作</dt>
-        <dd>软件构建 · 独立项目 · 公开学习</dd>
-        <dt>社交</dt>
-        <dd>
-          <a
-            href={socialLinks.github}
-            target="_blank"
-            rel="me noopener noreferrer">GitHub</a
-          >
-          <span aria-hidden="true"> · </span>
-          <a
-            href={socialLinks.x}
-            target="_blank"
-            rel="me noopener noreferrer">X</a
-          >
-          <span aria-hidden="true"> · </span>
-          <a
-            href={socialLinks.linkedin}
-            target="_blank"
-            rel="me noopener noreferrer">LinkedIn</a
-          >
-        </dd>
-      </dl>
       <div class="home-actions">
         <a class="button-primary" href={`${base}/blog/`}>阅读博客</a>
         <a class="button-quiet" href={`${base}/about/`}>关于我 →</a>
@@ -74,5 +55,49 @@ const structuredData = [
     <div class="home-hero-aside">
       <HeroModel />
     </div>
+  </section>
+
+  <section class="home-writing" aria-labelledby="home-writing-title">
+    <div class="home-writing-heading">
+      <h2 id="home-writing-title">最近文章</h2>
+      <a href={`${base}/blog/`}>全部文章 →</a>
+    </div>
+    {
+      latestPosts.length > 0 ? (
+        <ul class="post-list">
+          {latestPosts.map((post) => (
+            <li>
+              <article class="post-row">
+                <div class="post-row-meta">
+                  <time datetime={post.data.pubDate.toISOString()}>
+                    {post.data.pubDate.toLocaleDateString("zh-CN", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      timeZone: "UTC",
+                    })}
+                  </time>
+                </div>
+                <div class="post-row-content">
+                  <h3>
+                    <a href={`${base}/blog/${post.id}/`}>{post.data.title}</a>
+                  </h3>
+                  <p>{post.data.description}</p>
+                  {
+                    post.data.tags.length > 0 && (
+                      <ul class="post-tags" aria-label="文章标签">
+                        {post.data.tags.map((tag) => <li>{tag}</li>)}
+                      </ul>
+                    )
+                  }
+                </div>
+              </article>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="empty-state">还没有文章。</p>
+      )
+    }
   </section>
 </BaseLayout>
