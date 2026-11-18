@@ -1,14 +1,9 @@
 ---
-import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import HeroModel from "../components/HeroModel.astro";
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const siteURL = new URL(`${base}/`, Astro.site).href;
-const posts = (await getCollection("blog", ({ data }) => !data.draft)).sort(
-  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-);
-const latestPosts = posts.slice(0, 3);
 const socialLinks = {
   github: "https://github.com/gotorion",
   x: "https://x.com/sigmoid1969",
@@ -55,49 +50,5 @@ const structuredData = [
     <div class="home-hero-aside">
       <HeroModel />
     </div>
-  </section>
-
-  <section class="home-writing" aria-labelledby="home-writing-title">
-    <div class="home-writing-heading">
-      <h2 id="home-writing-title">最近文章</h2>
-      <a href={`${base}/blog/`}>全部文章 →</a>
-    </div>
-    {
-      latestPosts.length > 0 ? (
-        <ul class="post-list">
-          {latestPosts.map((post) => (
-            <li>
-              <article class="post-row">
-                <div class="post-row-meta">
-                  <time datetime={post.data.pubDate.toISOString()}>
-                    {post.data.pubDate.toLocaleDateString("zh-CN", {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                      timeZone: "UTC",
-                    })}
-                  </time>
-                </div>
-                <div class="post-row-content">
-                  <h3>
-                    <a href={`${base}/blog/${post.id}/`}>{post.data.title}</a>
-                  </h3>
-                  <p>{post.data.description}</p>
-                  {
-                    post.data.tags.length > 0 && (
-                      <ul class="post-tags" aria-label="文章标签">
-                        {post.data.tags.map((tag) => <li>{tag}</li>)}
-                      </ul>
-                    )
-                  }
-                </div>
-              </article>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p class="empty-state">还没有文章。</p>
-      )
-    }
   </section>
 </BaseLayout>

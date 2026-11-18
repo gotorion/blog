@@ -833,30 +833,6 @@ code {
   color: var(--brand);
 }
 
-.home-writing {
-  margin-top: 8px;
-}
-
-.home-writing-heading {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 8px;
-}
-
-.home-writing-heading h2 {
-  font-size: 32px;
-}
-
-.home-writing-heading a {
-  flex: none;
-  font-family: var(--font-ui);
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-}
-
 /* ---------- Blog index ---------- */
 
 .blog-index {
@@ -1172,10 +1148,6 @@ code {
 
   .home-hero-sub {
     font-size: 19px;
-  }
-
-  .home-writing-heading h2 {
-    font-size: 28px;
   }
 
   .blog-index {
