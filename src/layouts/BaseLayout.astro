@@ -63,6 +63,19 @@ const navItems = [
   { href: `${base}/blog/`, label: "博客" },
   { href: `${base}/about/`, label: "关于" },
 ];
+// 页脚的构建日期用中文数字，和站内的楷体排版一致。
+const cnDigits = ["〇", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
+const toCn = (value: number) =>
+  value < 10
+    ? cnDigits[value]
+    : value < 20
+      ? `十${value % 10 ? cnDigits[value % 10] : ""}`
+      : `${cnDigits[Math.floor(value / 10)]}十${value % 10 ? cnDigits[value % 10] : ""}`;
+const builtAt = new Date();
+const builtYear = Array.from(String(builtAt.getUTCFullYear()), (digit) =>
+  toCn(Number(digit)),
+).join("");
+const builtDate = `${builtYear}年${toCn(builtAt.getUTCMonth() + 1)}月`;
 const currentPath = Astro.url.pathname;
 const isActive = (item: { href: string; exact?: boolean }) => {
   if (item.exact) return currentPath === item.href;
@@ -177,14 +190,50 @@ const isActive = (item: { href: string; exact?: boolean }) => {
 
     <footer class="site-footer">
       <div class="container footer-inner">
-        <div class="footer-mark">
-          <p class="footer-title">李俊辉</p>
-          <p class="footer-tagline">记录、思考与持续构建。</p>
+        <div class="footer-close">
+          <p class="footer-lead">有想法，就写信给我。</p>
+          <a class="footer-mail" href="mailto:lijunhui.me@foxmail.com">
+            lijunhui.me@foxmail.com
+          </a>
         </div>
-        <div class="footer-meta">
-          <p>© {new Date().getFullYear()} · lijunhui.me</p>
-          <p>基于 Astro 构建 · Cloudflare Pages</p>
-        </div>
+        <svg
+          class="footer-mark"
+          viewBox="0 0 64 64"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <g>
+            <circle cx="8" cy="10" r="2.6" />
+            <circle cx="20" cy="10" r="2.6" />
+            <circle cx="32" cy="10" r="2.6" />
+            <circle cx="44" cy="10" r="2.6" />
+            <circle cx="56" cy="10" r="2.6" />
+          </g>
+          <g>
+            <circle cx="20" cy="22" r="2.6" />
+            <circle cx="32" cy="22" r="2.6" />
+            <circle cx="44" cy="22" r="2.6" />
+          </g>
+          <g>
+            <circle cx="32" cy="32" r="2.6" />
+          </g>
+          <g>
+            <circle cx="20" cy="42" r="2.6" />
+            <circle cx="32" cy="42" r="2.6" />
+            <circle cx="44" cy="42" r="2.6" />
+          </g>
+          <g>
+            <circle cx="8" cy="54" r="2.6" />
+            <circle cx="20" cy="54" r="2.6" />
+            <circle cx="32" cy="54" r="2.6" />
+            <circle cx="44" cy="54" r="2.6" />
+            <circle cx="56" cy="54" r="2.6" />
+          </g>
+        </svg>
+      </div>
+      <div class="container footer-meta">
+        <p>© {builtDate.split("年")[0]} lijunhui.me</p>
+        <p>构建于 {builtDate} · Astro + Cloudflare Pages</p>
       </div>
     </footer>
 
