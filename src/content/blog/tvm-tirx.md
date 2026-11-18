@@ -99,3 +99,7 @@ IR（Intermediate Representation），中文叫做中间表示，是编译器内
 AST（Abstract Syntax Tree），也做抽象语法树，是编译器用来表示源代码结构的一种树形数据结构。因为源码本质上是一串文本，不便于编译器的遍历和分析。
 
 了解上面两个概念可以知道，上面的树也是一种AST树，只不过不是前端Python的AST，而是TIRx 的 IR 树。
+
+## tvm-tirx 的后端适配
+
+看源码CUDA后端是从CodeGenC类继承，其实是把TIRx的IR Lower到CUDA之类的类C代码，然后通过厂商的编译器编译。
