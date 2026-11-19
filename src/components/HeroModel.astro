@@ -20,7 +20,7 @@
     WebGLRenderer,
   } from "three";
 
-  const LABELS = ["Life Learner", "Creator", "Investor"];
+  const LABELS = ["Lifelong Learner", "Creator", "Investor"];
   const TEXTURE_WIDTH = 2048;
   const TEXTURE_HEIGHT = 1536;
   const LINE_SPACING = 1.3;
@@ -82,20 +82,18 @@
       (canvas.height * 0.82) / (LABELS.length * LINE_SPACING);
     const size = Math.min(widthLimit, heightLimit);
 
-    const widths = LABELS.map((label) => widthAt(label, size));
-    const blockWidth = Math.max(...widths);
     const lineHeight = size * LINE_SPACING;
     const blockHeight = (LABELS.length - 1) * lineHeight + size;
-    const startX = (canvas.width - blockWidth) / 2;
+    const centerX = canvas.width / 2;
     const startY = (canvas.height - blockHeight) / 2 + size / 2;
 
     context.font = `400 ${size}px ${FONT_STACK}`;
     context.fillStyle = "#fff";
-    context.textAlign = "left";
+    context.textAlign = "center";
     context.textBaseline = "middle";
 
     LABELS.forEach((label, index) => {
-      context.fillText(label, startX, startY + index * lineHeight);
+      context.fillText(label, centerX, startY + index * lineHeight);
     });
 
     return canvas;
