@@ -19,7 +19,7 @@
 ```
 src/
   content.config.ts      blog / pages 集合 schema
-  content/blog/*.md      文章；文件名即 URL slug
+  content/blog/<slug>/index.md  文章；文件夹名即 URL slug，图片放同目录
   content/pages/*.md     单页正文（关于等）；文件名即条目 ID
   components/            HeroModel.astro（首页 three.js 点阵标签，程序化生成，无模型文件）、TableOfContents.astro（文章页目录）
   layouts/               BaseLayout（全站外壳、导航、社交链接）、BlogPostLayout（文章页）
@@ -30,8 +30,8 @@ public/fonts/            仓耳今楷字体（仅个人非商业授权）
 
 ## 内容规范
 
-- 在 `src/content/blog/` 新建 `.md`，frontmatter 必填 `title`、`description`、`pubDate`；可选 `updatedDate`、`draft`、`tags`。
-- 文件名用小写英文短横线（如 `why-i-started-blogging-again.md`）；重命名会改变 URL 并留下旧链接失效。
+- 每篇文章是独立文件夹：`src/content/blog/<slug>/index.md`。frontmatter 必填 `title`、`description`、`pubDate`；可选 `updatedDate`、`draft`、`tags`。文件夹名用小写英文短横线（如 `why-i-started-blogging-again/`）；重命名会改变 URL 并留下旧链接失效。
+- 文章图片直接放进该文章的文件夹，正文用相对路径引用（`![说明](./figure.png)`），构建时自动压缩为 webp。不把图片放 `public/`。
 - `draft: true` 的文章不进入首页与构建。
 - 正文用中文，标题与摘要简洁。
 
