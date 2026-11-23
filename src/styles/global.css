@@ -97,9 +97,22 @@ a:hover {
   white-space: nowrap;
 }
 
-.site-title span {
-  color: var(--stone);
-  font-weight: 400;
+.header-mark {
+  display: grid;
+  align-items: center;
+  width: min(210px, 70vw);
+  min-height: 44px;
+  color: var(--brand);
+  font-family: var(--font-ui);
+}
+
+.header-mark canvas {
+  width: 100%;
+  height: auto;
+}
+
+.header-mark:has(canvas:not([hidden])) > span {
+  display: none;
 }
 
 .site-title:hover {

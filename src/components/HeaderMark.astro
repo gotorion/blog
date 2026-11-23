@@ -1,0 +1,60 @@
+<span class="header-mark" aria-hidden="true">
+  <span>Lifelong Learner</span>
+  <canvas width="420" height="88" hidden></canvas>
+</span>
+
+<script>
+  const mark = document.querySelector<HTMLElement>(".header-mark");
+  const canvas = mark?.querySelector("canvas");
+  if (mark && canvas) {
+    const ctx = canvas.getContext("2d");
+    const mask = document.createElement("canvas");
+    mask.width = canvas.width;
+    mask.height = canvas.height;
+    const pen = mask.getContext("2d", { willReadFrequently: true });
+    if (ctx && pen) {
+      const { width, height } = canvas;
+      pen.font = `600 46px ${getComputedStyle(mark).fontFamily}`;
+      pen.textBaseline = "middle";
+      const words = ["Lifelong Learner", "Creator", "Investor"];
+      const shapes = words.map((word) => {
+        pen.clearRect(0, 0, width, height);
+        pen.fillText(word, 4, height / 2, width - 12);
+        const pixels = pen.getImageData(0, 0, width, height).data;
+        const dots = [];
+        for (let y = 2; y < height; y += 3) {
+          for (let x = 2; x < width; x += 3) {
+            if (pixels[(y * width + x) * 4 + 3] > 90) {
+              dots.push({ x, y, dx: Math.random() * width - x, dy: Math.random() * height - y });
+            }
+          }
+        }
+        return dots;
+      });
+      const motion = matchMedia("(prefers-reduced-motion: reduce)");
+      let frame = 0;
+      function start() {
+        cancelAnimationFrame(frame);
+        canvas!.hidden = motion.matches;
+        if (motion.matches) return;
+        const begin = performance.now();
+        function draw(now: number) {
+          const elapsed = (now - begin) / 1000;
+          const phase = elapsed % 6;
+          const scatter = Math.max(0, 1 - phase, phase - 5) ** 2;
+          const dots = shapes[Math.floor(elapsed / 6) % shapes.length];
+          ctx!.clearRect(0, 0, width, height);
+          ctx!.fillStyle = getComputedStyle(mark!).color;
+          ctx!.globalAlpha = 1 - scatter * 0.8;
+          for (const dot of dots) {
+            ctx!.fillRect(dot.x + dot.dx * scatter, dot.y + dot.dy * scatter, 2.5, 2.5);
+          }
+          frame = requestAnimationFrame(draw);
+        }
+        frame = requestAnimationFrame(draw);
+      }
+      motion.addEventListener("change", start);
+      start();
+    }
+  }
+</script>

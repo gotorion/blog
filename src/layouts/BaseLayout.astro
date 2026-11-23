@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import HeaderMark from "../components/HeaderMark.astro";
 import { siGithub, siX } from "simple-icons";
 
 interface Props {
@@ -141,8 +142,8 @@ const isActive = (item: { href: string; exact?: boolean }) => {
   <body>
     <header class="site-header">
       <div class="container header-inner">
-        <a class="site-title" href={`${base}/`}>
-          李俊辉 <span>lijunhui.me</span>
+        <a class="site-title" href={`${base}/`} aria-label="李俊辉的首页">
+          <HeaderMark />
         </a>
         <nav class="site-nav" aria-label="主导航">
           <div class="nav-links">
