@@ -1,6 +1,5 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import HeroModel from "../components/HeroModel.astro";
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const siteURL = new URL(`${base}/`, Astro.site).href;
@@ -36,19 +35,14 @@ const structuredData = [
   structuredData={structuredData}
 >
   <section class="home-hero">
-    <div class="home-hero-main">
-      <p class="home-hero-rubric">独立开发者 · 写作者</p>
-      <h1>李俊辉</h1>
-      <p class="home-hero-sub">
-        写软件，做独立项目，也在这里记录过程中的思考。
-      </p>
-      <div class="home-actions">
-        <a class="button-primary" href={`${base}/blog/`}>阅读博客</a>
-        <a class="button-quiet" href={`${base}/about/`}>关于我 →</a>
-      </div>
-    </div>
-    <div class="home-hero-aside">
-      <HeroModel />
+    <p class="home-hero-rubric">独立开发者 · 写作者</p>
+    <h1>李俊辉</h1>
+    <p class="home-hero-sub">
+      写软件，做独立项目，也在这里记录过程中的思考。
+    </p>
+    <div class="home-actions">
+      <a class="button-primary" href={`${base}/blog/`}>阅读博客</a>
+      <a class="button-quiet" href={`${base}/about/`}>关于我 →</a>
     </div>
   </section>
 </BaseLayout>
