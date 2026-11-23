@@ -41,7 +41,7 @@ src/
 - 样式集中在 `global.css`；颜色、字体、宽度一律用 `:root` 变量，不写死色值。three.js 里的颜色从 CSS 变量读取，不重复写色值。
 - 站内链接与静态资源带 base 前缀：`const base = import.meta.env.BASE_URL.replace(/\/$/, "")`，再用 `${base}/path/`。
 - 界面语言为中文（`<html lang="zh-CN">`）；日期用 `zh-CN`、`timeZone: "UTC"` 格式化。
-- 设计基调：暖纸色背景、深蓝强调色、衬线正文、克制排版；动效只保留首页 3D 的缓慢自转，必须尊重 `prefers-reduced-motion`。
+- 设计基调：暖纸色背景、深蓝强调色、系统无衬线正文、克制排版；动效只保留首页 3D 的缓慢自转，必须尊重 `prefers-reduced-motion`。
 - 响应式断点：1040px（文章目录从右侧栏收回折叠）/ 880px / 480px / 360px。
 
 ## 改哪里
