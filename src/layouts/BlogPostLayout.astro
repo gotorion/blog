@@ -5,21 +5,10 @@ import TableOfContents from "../components/TableOfContents.astro";
 
 interface Props {
   title: string;
-  description: string;
-  pubDate: Date;
-  updatedDate?: Date;
-  tags?: string[];
   headings?: MarkdownHeading[];
 }
 
-const {
-  title,
-  description,
-  pubDate,
-  updatedDate,
-  tags = [],
-  headings = [],
-} = Astro.props;
+const { title, headings = [] } = Astro.props;
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 const tocItems = headings.filter(
@@ -27,61 +16,28 @@ const tocItems = headings.filter(
 );
 const showToc = tocItems.length >= 2;
 
-const formatDate = (date: Date) =>
-  date
-    .toLocaleDateString("zh-CN", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      timeZone: "UTC",
-    })
-    .replace(/(\d)(年|月|日)/g, "$1 $2");
-
-const published = formatDate(pubDate);
-const updated = updatedDate ? formatDate(updatedDate) : undefined;
-
 const canonicalURL = new URL(Astro.url.pathname, Astro.site).href;
 const articleSchema = {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
   headline: title,
-  description,
-  datePublished: pubDate.toISOString(),
-  dateModified: (updatedDate ?? pubDate).toISOString(),
   inLanguage: "zh-CN",
   url: canonicalURL,
   mainEntityOfPage: { "@type": "WebPage", "@id": canonicalURL },
   author: { "@type": "Person", name: "李俊辉", url: "https://lijunhui.me/" },
   publisher: { "@type": "Person", name: "李俊辉", url: "https://lijunhui.me/" },
-  ...(tags.length > 0 ? { keywords: tags.join(",") } : {}),
 };
 ---
 
 <BaseLayout
   title={title}
-  description={description}
   type="article"
-  publishedTime={pubDate}
-  modifiedTime={updatedDate}
-  tags={tags}
   structuredData={articleSchema}
 >
   <div class="reading-progress" aria-hidden="true"></div>
   <article class="post">
     <header class="post-header">
-      <div class="post-kicker">
-        <span>文章</span>
-        <time datetime={pubDate.toISOString()}>{published}</time>
-      </div>
       <h1>{title}</h1>
-      <p class="post-description">{description}</p>
-      {
-        updated && (
-          <p class="post-updated">
-            更新于 <time datetime={updatedDate?.toISOString()}>{updated}</time>
-          </p>
-        )
-      }
     </header>
 
     <div class="post-body">
@@ -112,13 +68,6 @@ const articleSchema = {
 
     <footer class="post-footer">
       <a class="back-link" href={`${base}/blog/`}>← 返回博客</a>
-      {
-        tags.length > 0 && (
-          <ul class="post-tags" aria-label="文章标签">
-            {tags.map((tag) => <li>{tag}</li>)}
-          </ul>
-        )
-      }
     </footer>
   </article>
 </BaseLayout>

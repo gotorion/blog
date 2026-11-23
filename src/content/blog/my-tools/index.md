@@ -1,9 +1,5 @@
 ---
 title: "我的常用工具"
-description: "我的常用工具"
-pubDate: 2026-11-16
-tags:
-  - work
 ---
 
 ## 硬件设备

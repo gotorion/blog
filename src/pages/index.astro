@@ -4,18 +4,12 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const siteURL = new URL(`${base}/`, Astro.site).href;
-const posts = (await getCollection("blog", ({ data }) => !data.draft))
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const posts = (await getCollection("blog", ({ data }) => data.title.length > 0))
+  .sort((a, b) => a.data.title.localeCompare(b.data.title, "zh-CN"));
 const featured = posts.find(({ id }) => id === "why-i-started-blogging-again");
-const recentPosts = posts.filter(({ id }) => id !== featured?.id).slice(0, 3);
-const engineeringPost = posts.find(({ data }) => data.tags.includes("AI编译"));
-const investingPost = posts.find(({ data }) => data.tags.includes("投资"));
-const dateFormat = new Intl.DateTimeFormat("zh-CN", {
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-  timeZone: "UTC",
-});
+const selectedPosts = posts.filter(({ id }) => id !== featured?.id).slice(0, 3);
+const engineeringPost = posts.find(({ id }) => id === "tvm-tirx");
+const investingPost = posts.find(({ id }) => id === "my-invest-plan");
 const socialLinks = {
   github: "https://github.com/gotorion",
   x: "https://x.com/sigmoid1969",
@@ -64,7 +58,6 @@ const structuredData = [
         <h2 id="home-feature-title">
           <a href={`${base}/blog/${featured.id}/`}>{featured.data.title}</a>
         </h2>
-        {featured.data.description !== featured.data.title && <p>{featured.data.description}</p>}
       </aside>
     )}
   </section>
@@ -91,19 +84,17 @@ const structuredData = [
     </ul>
   </section>
 
-  {recentPosts.length > 0 && (
+  {selectedPosts.length > 0 && (
     <section class="home-writing" aria-labelledby="home-writing-title">
       <header class="home-writing-header">
-        <h2 id="home-writing-title">最近在写什么</h2>
+        <h2 id="home-writing-title">文章选读</h2>
         <a href={`${base}/blog/`}>全部文章</a>
       </header>
       <ul class="home-posts">
-        {recentPosts.map(({ id, data }) => (
+        {selectedPosts.map(({ id, data }) => (
           <li>
             <article>
-              <time datetime={data.pubDate.toISOString()}>{dateFormat.format(data.pubDate)}</time>
               <h3><a href={`${base}/blog/${id}/`}>{data.title}</a></h3>
-              {data.description !== data.title && <p>{data.description}</p>}
             </article>
           </li>
         ))}

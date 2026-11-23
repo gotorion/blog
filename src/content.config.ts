@@ -10,12 +10,7 @@ const blog = defineCollection({
       entry.replace(/\.(md|mdx)$/, "").replace(/\/index$/, "") || "index",
   }),
   schema: z.object({
-    title: z.string(),
-    description: z.string(),
-    pubDate: z.coerce.date(),
-    updatedDate: z.coerce.date().optional(),
-    draft: z.boolean().default(false),
-    tags: z.array(z.string()).default([]),
+    title: z.string().trim().default(""),
   }),
 });
 

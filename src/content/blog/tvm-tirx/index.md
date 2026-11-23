@@ -1,9 +1,5 @@
 ---
 title: "Tvm-tirx适配"
-description: "本文记录tvm-tirx适配的学习记录"
-pubDate: 2026-11-18
-tags:
-  - AI编译
 ---
 ## 了解 tvm-tirx
 
