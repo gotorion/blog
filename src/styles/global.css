@@ -109,6 +109,13 @@ a:hover {
   height: auto;
 }
 
+.header-mark > span {
+  font-size: 1.4375rem;
+  font-weight: 600;
+  letter-spacing: normal;
+  line-height: 1;
+}
+
 .header-mark:has(canvas:not([hidden])) > span {
   display: none;
 }

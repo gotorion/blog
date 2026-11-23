@@ -6,7 +6,8 @@
 <script>
   const mark = document.querySelector<HTMLElement>(".header-mark");
   const canvas = mark?.querySelector("canvas");
-  if (mark && canvas) {
+  const label = mark?.querySelector("span");
+  if (mark && canvas && label) {
     const ctx = canvas.getContext("2d");
     const mask = document.createElement("canvas");
     mask.width = canvas.width;
@@ -19,7 +20,7 @@
       const words = ["Lifelong Learner", "Creator", "Investor"];
       const shapes = words.map((word) => {
         pen.clearRect(0, 0, width, height);
-        pen.fillText(word, 4, height / 2, width - 12);
+        pen.fillText(word, 0, height / 2, width);
         const pixels = pen.getImageData(0, 0, width, height).data;
         const dots = [];
         for (let y = 2; y < height; y += 3) {
@@ -33,16 +34,29 @@
       });
       const motion = matchMedia("(prefers-reduced-motion: reduce)");
       let frame = 0;
+      let timer = 0;
       function start() {
         cancelAnimationFrame(frame);
-        canvas!.hidden = motion.matches;
+        clearTimeout(timer);
+        canvas!.hidden = true;
+        label!.textContent = words[0];
         if (motion.matches) return;
         const begin = performance.now();
         function draw(now: number) {
           const elapsed = (now - begin) / 1000;
           const phase = elapsed % 6;
-          const scatter = Math.max(0, 1 - phase, phase - 5) ** 2;
-          const dots = shapes[Math.floor(elapsed / 6) % shapes.length];
+          const index = Math.floor(elapsed / 6) % shapes.length;
+          if (phase < 5 && (elapsed < 6 || phase >= 0.45)) {
+            label!.textContent = words[index];
+            canvas!.hidden = true;
+            timer = window.setTimeout(() => {
+              frame = requestAnimationFrame(draw);
+            }, (5 - phase) * 1000);
+            return;
+          }
+          canvas!.hidden = false;
+          const scatter = phase >= 5 ? (phase - 5) ** 2 : (1 - phase / 0.45) ** 2;
+          const dots = shapes[index];
           ctx!.clearRect(0, 0, width, height);
           ctx!.fillStyle = getComputedStyle(mark!).color;
           ctx!.globalAlpha = 1 - scatter * 0.8;
