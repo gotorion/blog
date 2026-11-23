@@ -1,8 +1,21 @@
 ---
+import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const siteURL = new URL(`${base}/`, Astro.site).href;
+const posts = (await getCollection("blog", ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const featured = posts.find(({ id }) => id === "why-i-started-blogging-again");
+const recentPosts = posts.filter(({ id }) => id !== featured?.id).slice(0, 3);
+const engineeringPost = posts.find(({ data }) => data.tags.includes("AI编译"));
+const investingPost = posts.find(({ data }) => data.tags.includes("投资"));
+const dateFormat = new Intl.DateTimeFormat("zh-CN", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+  timeZone: "UTC",
+});
 const socialLinks = {
   github: "https://github.com/gotorion",
   x: "https://x.com/sigmoid1969",
@@ -34,15 +47,67 @@ const structuredData = [
   description="李俊辉（lijunhui.me）的个人主页。写软件，做独立项目，记录过程中的思考。"
   structuredData={structuredData}
 >
-  <section class="home-hero">
-    <p class="home-hero-rubric">独立开发者 · 写作者</p>
-    <h1>李俊辉</h1>
-    <p class="home-hero-sub">
-      写软件，做独立项目，也在这里记录过程中的思考。
-    </p>
-    <div class="home-actions">
-      <a class="button-primary" href={`${base}/blog/`}>阅读博客</a>
-      <a class="button-quiet" href={`${base}/about/`}>关于我 →</a>
+  <section class="home-hero" aria-labelledby="home-title">
+    <div class="home-intro">
+      <h1 id="home-title">你好，我是<span>李俊辉</span>。</h1>
+      <p class="home-hero-sub">
+        我是一名在上海工作的工程师。平时写软件、做独立项目，也在这里记录我对技术、阅读和投资的思考。
+      </p>
+      <div class="home-actions">
+        <a class="button-primary" href="#home-topics">从这里开始</a>
+        <a class="button-quiet" href={`${base}/about/`}>关于我</a>
+      </div>
     </div>
+    {featured && (
+      <aside class="home-feature" aria-labelledby="home-feature-title">
+        <p>关于这个博客</p>
+        <h2 id="home-feature-title">
+          <a href={`${base}/blog/${featured.id}/`}>{featured.data.title}</a>
+        </h2>
+        {featured.data.description !== featured.data.title && <p>{featured.data.description}</p>}
+      </aside>
+    )}
   </section>
+
+  <section class="home-topics" id="home-topics" aria-labelledby="home-topics-title">
+    <h2 id="home-topics-title">从你感兴趣的开始</h2>
+    <ul class="home-topic-grid">
+      {engineeringPost && (
+        <li class="home-topic home-topic-tech">
+          <h3>软件与技术</h3>
+          <a href={`${base}/blog/${engineeringPost.id}/`}>{engineeringPost.data.title}</a>
+        </li>
+      )}
+      <li class="home-topic home-topic-code">
+        <h3>独立项目</h3>
+        <a href={socialLinks.github}>浏览 GitHub 仓库</a>
+      </li>
+      {investingPost && (
+        <li class="home-topic home-topic-invest">
+          <h3>投资笔记</h3>
+          <a href={`${base}/blog/${investingPost.id}/`}>{investingPost.data.title}</a>
+        </li>
+      )}
+    </ul>
+  </section>
+
+  {recentPosts.length > 0 && (
+    <section class="home-writing" aria-labelledby="home-writing-title">
+      <header class="home-writing-header">
+        <h2 id="home-writing-title">最近在写什么</h2>
+        <a href={`${base}/blog/`}>全部文章</a>
+      </header>
+      <ul class="home-posts">
+        {recentPosts.map(({ id, data }) => (
+          <li>
+            <article>
+              <time datetime={data.pubDate.toISOString()}>{dateFormat.format(data.pubDate)}</time>
+              <h3><a href={`${base}/blog/${id}/`}>{data.title}</a></h3>
+              {data.description !== data.title && <p>{data.description}</p>}
+            </article>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
 </BaseLayout>
