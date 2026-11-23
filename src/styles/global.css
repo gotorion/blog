@@ -20,11 +20,9 @@
   --border-soft: #e5e3d8;
   --line: #d8d5c8;
 
-  --font-serif: "Tsanger JinKai", "TsangerJinKai02 W03", "Source Han Serif SC",
-    "Noto Serif SC", "Songti SC", STSong, SimSun, Georgia, serif;
-  --font-ui: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas,
-    "Tsanger JinKai", monospace;
+  --font-serif: ui-serif, "Songti SC", "Noto Serif CJK SC", SimSun, serif;
+  --font-ui: system-ui, "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Consolas, "DejaVu Sans Mono", monospace;
 
   --frame-width: 1120px;
   --reading-width: 720px;
@@ -990,39 +988,6 @@ code {
   color: var(--brand-light);
 }
 
-/* 页脚的沙漏：与 favicon 同一组点阵，静止时淡，漏沙时逐帧 */
-.footer-mark {
-  flex: none;
-  width: 96px;
-  height: 96px;
-  fill: var(--brand);
-}
-
-.footer-mark g {
-  opacity: 0.32;
-}
-
-.footer-mark g:nth-child(1) { animation: footer-drain 6s steps(1, end) infinite; }
-.footer-mark g:nth-child(2) { animation: footer-drain 6s steps(1, end) infinite 1.5s; }
-.footer-mark g:nth-child(3) { animation: footer-drain 6s steps(1, end) infinite 1.5s; }
-.footer-mark g:nth-child(4) { animation: footer-fill 6s steps(1, end) infinite 1.5s; }
-.footer-mark g:nth-child(5) { animation: footer-fill 6s steps(1, end) infinite; }
-
-/* 移到沙漏上时走快一点 */
-.footer-mark:hover g {
-  animation-duration: 2.4s;
-}
-
-@keyframes footer-drain {
-  0%, 25% { opacity: 1; }
-  50%, 75% { opacity: 0.32; }
-}
-
-@keyframes footer-fill {
-  0%, 25% { opacity: 0.32; }
-  50%, 75% { opacity: 1; }
-}
-
 .footer-meta {
   display: flex;
   flex-wrap: wrap;
@@ -1036,13 +1001,6 @@ code {
 
 .footer-meta p {
   margin: 0;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .footer-mark g {
-    animation: none;
-    opacity: 1;
-  }
 }
 
 @media (max-width: 880px) {
@@ -1074,12 +1032,6 @@ code {
   .footer-inner {
     flex-direction: column;
     gap: 24px;
-  }
-
-  .footer-mark {
-    order: -1;
-    width: 56px;
-    height: 56px;
   }
 
   .footer-close {

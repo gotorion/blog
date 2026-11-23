@@ -25,7 +25,6 @@ src/
   layouts/               BaseLayout（全站外壳、导航、社交链接）、BlogPostLayout（文章页）
   pages/                 index.astro（个人主页）、blog/index.astro（博客列表）、blog/[...slug].astro（文章页）
   styles/global.css      全部样式与设计令牌
-public/fonts/            仓耳今楷字体（仅个人非商业授权）
 ```
 
 ## 内容规范
@@ -57,7 +56,7 @@ public/fonts/            仓耳今楷字体（仅个人非商业授权）
 ## 禁止
 
 - 不提交 `dist/`、`.astro/`、`.wrangler/`、`.taste-skill/`、`node_modules/`。
-- 不修改 `public/fonts/` 字体文件；商业使用需向仓耳字库取得授权。
+- 使用系统字体，中文正文、界面和代码的字体栈集中在 `global.css`。
 - 不把生成产物当作源码编辑。
 
 ## 部署
